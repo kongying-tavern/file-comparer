@@ -1,0 +1,30 @@
+{
+  "name": "file-compare",
+  "version": "0.0.0",
+  "main": "index.js",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "commit": "cz",
+    "compare": "node index.js",
+    "lint": "eslint --ext .js ."
+  },
+  "dependencies": {
+    "fs-extra": "^10.0.1",
+    "globby": "^13.1.1",
+    "lodash": "^4.17.21",
+    "md5": "^2.3.0",
+    "p-queue": "^7.2.0",
+    "yargs": "^17.3.1"
+  },
+  "devDependencies": {
+    "commitizen": "^4.2.4",
+    "cz-conventional-changelog": "3.3.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
