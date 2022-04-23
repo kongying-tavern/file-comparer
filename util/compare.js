@@ -2,20 +2,28 @@ import _ from 'lodash'
 import UtilPath from './path.js'
 import UtilHash from './hash.js'
 
-function getFileSummary (base = '', paths = []) {
+function getFileSummary (base = '', paths = [], queue = null) {
+  const countTotal = paths.length
+  let countDone = 0
   const summary = []
+  console.log(`total: ${countTotal}`)
 
-  _.each(paths, path => {
-    const filename = UtilPath.relative(base, path)
-    const md5 = UtilHash.getHash(path)
+  _.each(paths, async path => {
+    await queue.add(() => {
+      const filename = UtilPath.relative(base, path)
+      const md5 = UtilHash.getHash(path)
 
-    const pack = {
-      path,
-      filename,
-      md5
-    }
+      const pack = {
+        path,
+        filename,
+        md5
+      }
 
-    summary.push(pack)
+      summary.push(pack)
+
+      countDone++
+      console.log(`${countDone} / ${countTotal}`)
+    })
   })
 
   return summary

@@ -9,7 +9,7 @@ function getArgv () {
       required: true
     })
     .option('lhs-queue', {
-      alias: 'p',
+      alias: 'n',
       type: 'number',
       description: 'left-hand-side queue size',
       default: 10
@@ -21,7 +21,7 @@ function getArgv () {
       required: true
     })
     .option('rhs-queue', {
-      alias: 'q',
+      alias: 'm',
       type: 'number',
       description: 'right-hand-side queue size',
       default: 10
@@ -31,12 +31,6 @@ function getArgv () {
       type: 'string',
       description: 'report output directory',
       required: true
-    })
-    .option('queue-number', {
-      alias: 'n',
-      type: 'number',
-      default: 10,
-      description: 'queue number'
     })
     .argv
 
