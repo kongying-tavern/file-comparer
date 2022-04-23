@@ -1,12 +1,12 @@
 import _ from 'lodash'
 import UtilPath from './path.js'
 import UtilHash from './hash.js'
+import UtilProgress from './progress.js'
 
 function getFileSummary (base = '', paths = [], queue = null) {
   const countTotal = paths.length
-  let countDone = 0
+  const progress = UtilProgress.createProgressbar({ total: countTotal })
   const summary = []
-  console.log(`total: ${countTotal}`)
 
   _.each(paths, async path => {
     await queue.add(() => {
@@ -20,9 +20,7 @@ function getFileSummary (base = '', paths = [], queue = null) {
       }
 
       summary.push(pack)
-
-      countDone++
-      console.log(`${countDone} / ${countTotal}`)
+      progress.tick()
     })
   })
 
