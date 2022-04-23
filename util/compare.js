@@ -11,7 +11,7 @@ function getFileSummary (base = '', paths = [], queue = null) {
   _.each(paths, async path => {
     await queue.add(() => {
       const filename = UtilPath.relative(base, path)
-      const md5 = UtilHash.getHash(path, { offset: 0, limit: 30 * 1024 * 1024 })
+      const md5 = UtilHash.getHash(path, { offset: 0, limit: 100 * 1024 })
 
       const pack = {
         path,
