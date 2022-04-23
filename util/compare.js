@@ -2,62 +2,62 @@ import _ from 'lodash'
 import UtilPath from './path.js'
 import UtilHash from './hash.js'
 
-function getFileSummary(base = '', paths = []) {
-    let summary = []
+function getFileSummary (base = '', paths = []) {
+  const summary = []
 
-    _.each(paths, path => {
-        let filename = UtilPath.relative(base, path)
-        let md5 = UtilHash.getHash(path)
+  _.each(paths, path => {
+    const filename = UtilPath.relative(base, path)
+    const md5 = UtilHash.getHash(path)
 
-        let pack = {
-            path,
-            filename,
-            md5
-        }
+    const pack = {
+      path,
+      filename,
+      md5
+    }
 
-        summary.push(pack)
-    })
+    summary.push(pack)
+  })
 
-    return summary
+  return summary
 }
 
-function getCompareSummary(lhs = [], rhs = []) {
-    let lhsMap = _.groupBy(lhs, 'md5')
-    let lhsHashes = _.keys(lhsMap)
-    let rhsMap = _.groupBy(rhs, 'md5')
-    let rhsHashes = _.keys(rhsMap)
-    let unionHashes = _.uniq(_.union(lhsHashes, rhsHashes))
+function getCompareSummary (lhs = [], rhs = []) {
+  const lhsMap = _.groupBy(lhs, 'md5')
+  const lhsHashes = _.keys(lhsMap)
+  const rhsMap = _.groupBy(rhs, 'md5')
+  const rhsHashes = _.keys(rhsMap)
+  const unionHashes = _.uniq(_.union(lhsHashes, rhsHashes))
 
-    let summary = [];
+  const summary = []
 
-    _.each(unionHashes, hash => {
-        let lhsItem = lhsMap[hash] || []
-        let rhsItem = rhsMap[hash] || []
-        let type = ''
+  _.each(unionHashes, hash => {
+    const lhsItem = lhsMap[hash] || []
+    const rhsItem = rhsMap[hash] || []
+    let type = ''
 
-        if(lhsItem.length <= 0 && rhsItem.length > 0) {
-            type = 'add'
-        } else if(lhsItem.length > 0 && rhsItem.length <= 0) {
-            type = 'remove'
-        } else {
-            type = 'same'
-        }
+    if (lhsItem.length <= 0 && rhsItem.length > 0) {
+      type = 'add'
+    } else if (lhsItem.length > 0 && rhsItem.length <= 0) {
+      type = 'remove'
+    } else {
+      type = 'same'
+    }
 
-        let pack = {
-            hash,
-            type,
-            lhs: lhsItem,
-            rhs: rhsItem
-        }
+    const pack = {
+      hash,
+      type,
+      lhs: lhsItem,
+      rhs: rhsItem
+    }
 
-        summary.push(pack)
-    })
+    summary.push(pack)
+  })
 
-    return summary
+  return summary
 }
 
-function getCompareReport(summary = []) {
-    let template = `<!DOCTYPE html>
+function getCompareReport (summary = []) {
+  const template = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -173,17 +173,17 @@ function getCompareReport(summary = []) {
     })
     </script>
 </body>
-</html>`;
+</html>`
 
-    let renderer = _.template(template, {
-        interpolate: /\{\{__([\s\S]+?)__\}\}/g
-    })
+  const renderer = _.template(template, {
+    interpolate: /\{\{__([\s\S]+?)__\}\}/g
+  })
 
-    return renderer({summary: JSON.stringify(summary)})
+  return renderer({ summary: JSON.stringify(summary) })
 }
 
 export default {
-    getFileSummary,
-    getCompareSummary,
-    getCompareReport
+  getFileSummary,
+  getCompareSummary,
+  getCompareReport
 }
