@@ -2,22 +2,30 @@ import _ from 'lodash'
 import MD5 from 'md5'
 import FsExtra from 'fs-extra'
 
-function getHash (path = '', opts = {}) {
-  const offset = +opts.offset
-  const offsetVal = _.isFinite(offset) ? offset : 0
-  const limit = +opts.limit
-  const limitVal = _.isFinite(limit) ? limit : 102400
+function getHashByChunks (path = '', opts = {}) {
   const fd = FsExtra.openSync(path, 'r')
   const fstat = FsExtra.fstatSync(fd)
-  const bufSize = fstat.size - offsetVal > limitVal ? limitVal : fstat.size - offsetVal
-  const buf = Buffer.alloc(bufSize)
-  FsExtra.readSync(fd, buf, 0, bufSize, offsetVal)
+
+  const chunks = opts.chunks || []
+  const chunksBuf = _
+    .chain(chunks)
+    .map(chunk => {
+      const bufOffset = +chunk.offset || 0
+      const bufLimit = +chunk.limit || 40960
+      const bufSize = Math.max(Math.min(bufLimit, fstat.size - bufOffset), 0)
+      const buf = Buffer.alloc(bufSize)
+      FsExtra.readSync(fd, buf, 0, bufSize, bufOffset)
+
+      return buf
+    })
+    .value()
+  const mergedBuf = Buffer.concat(chunksBuf)
   FsExtra.closeSync(fd)
-  const md5 = MD5(buf)
+  const md5 = MD5(mergedBuf)
 
   return md5
 }
 
 export default {
-  getHash
+  getHashByChunks
 }
