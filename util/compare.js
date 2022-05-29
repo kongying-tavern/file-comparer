@@ -7,14 +7,13 @@ function getFileSummary (base = '', paths = [], queue = null) {
   const countTotal = paths.length
   const progress = UtilProgress.createProgressbar({ total: countTotal })
   const summary = []
+  const hashChunkConfig = UtilHash.getHashChunkPlots({ name: 'single plot', offset: 0, limit: 100 * 1024 })
 
   _.each(paths, async path => {
     await queue.add(() => {
       const filename = UtilPath.relative(base, path)
       const md5 = UtilHash.getHashByChunks(path, {
-        chunks: [
-          { offset: 0, limit: 100 * 1024 }
-        ]
+        chunks: hashChunkConfig
       })
 
       const pack = {

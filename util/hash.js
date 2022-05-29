@@ -26,6 +26,20 @@ function getHashByChunks (path = '', opts = {}) {
   return md5
 }
 
+function getHashChunkPlots (opts = {}) {
+  const plots = []
+  const name = opts.name || []
+
+  if (name === 'single plot') {
+    const offset = opts.offset
+    const limit = opts.limit
+    plots.push({ offset, limit })
+  }
+
+  return plots
+}
+
 export default {
-  getHashByChunks
+  getHashByChunks,
+  getHashChunkPlots
 }
