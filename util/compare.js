@@ -3,15 +3,18 @@ import UtilPath from './path.js'
 import UtilHash from './hash.js'
 import UtilProgress from './progress.js'
 
-function getFileSummary (base = '', paths = [], queue = null) {
+async function getFileSummary (base = '', paths = [], queue = null) {
   const countTotal = paths.length
   const progress = UtilProgress.createProgressbar({ total: countTotal })
   const summary = []
+  const hashChunkConfig = UtilHash.getHashChunkPlots({ name: 'single plot', offset: 0, limit: 100 * 1024 })
 
   _.each(paths, async path => {
     await queue.add(() => {
       const filename = UtilPath.relative(base, path)
-      const md5 = UtilHash.getHash(path, { offset: 0, limit: 100 * 1024 })
+      const md5 = UtilHash.getHashByChunks(path, {
+        chunks: hashChunkConfig
+      })
 
       const pack = {
         path,
@@ -23,6 +26,44 @@ function getFileSummary (base = '', paths = [], queue = null) {
       progress.tick()
     })
   })
+
+  await queue.onIdle()
+
+  return summary
+}
+
+async function rehashFileSummary (files = [], queue = null) {
+  const countTotal = files.length
+  const progress = UtilProgress.createProgressbar({ total: countTotal })
+  const summary = []
+
+  _.each(files, async file => {
+    await queue.add(() => {
+      const path = file.path
+      const chunkConfig = UtilHash.getHashChunkPlots({
+        name: 'distribution plots',
+        file: path,
+        chunks: 10,
+        offset: 0,
+        limit: 10 * 1024
+      })
+      const filename = file.filename
+      const md5 = UtilHash.getHashByChunks(path, {
+        chunks: chunkConfig
+      })
+
+      const pack = {
+        path,
+        filename,
+        md5
+      }
+
+      summary.push(pack)
+      progress.tick()
+    })
+  })
+
+  await queue.onIdle()
 
   return summary
 }
@@ -60,6 +101,21 @@ function getCompareSummary (lhs = [], rhs = []) {
   })
 
   return summary
+}
+
+async function revalidateCompareSummary (summary = [], lhsQueue = null, rhsQueue = null) {
+  const summaryUnsame = _.filter(summary, v => v.type !== 'same')
+  const summarySame = _.filter(summary, v => v.type === 'same')
+
+  const lhs = _.chain(summarySame).map(v => v.lhs || []).flattenDeep().value()
+  const lhsRehashed = await rehashFileSummary(lhs, lhsQueue)
+  const rhs = _.chain(summarySame).map(v => v.rhs || []).flattenDeep().value()
+  const rhsRehashed = await rehashFileSummary(rhs, rhsQueue)
+  const summaryRehashed = getCompareSummary(lhsRehashed, rhsRehashed)
+
+  const summaryNew = _.concat([], summaryUnsame, summaryRehashed)
+
+  return summaryNew
 }
 
 function getCompareReport (summary = []) {
@@ -190,6 +246,8 @@ function getCompareReport (summary = []) {
 
 export default {
   getFileSummary,
+  rehashFileSummary,
   getCompareSummary,
+  revalidateCompareSummary,
   getCompareReport
 }

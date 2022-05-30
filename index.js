@@ -11,11 +11,11 @@ const argv = UtilArgs.getArgv();
   const lhsQueue = UtilQueue.createQueue({ concurrency: argv.n })
   const lhsFilePattern = UtilPath.resolve(argv.l, '**/*')
   const lhsFilePaths = await UtilPath.glob(lhsFilePattern)
-  const lhsFileSummary = UtilCompare.getFileSummary(argv.l, lhsFilePaths, lhsQueue)
+  const lhsFileSummary = await UtilCompare.getFileSummary(argv.l, lhsFilePaths, lhsQueue)
   const rhsQueue = UtilQueue.createQueue({ concurrency: argv.m })
   const rhsFilePattern = UtilPath.resolve(argv.r, '**/*')
   const rhsFilePaths = await UtilPath.glob(rhsFilePattern)
-  const rhsFileSummary = UtilCompare.getFileSummary(argv.r, rhsFilePaths, rhsQueue)
+  const rhsFileSummary = await UtilCompare.getFileSummary(argv.r, rhsFilePaths, rhsQueue)
 
   // save file summary
   const lhsFileSummaryOutputPath = UtilPath.resolve(argv.o, './file-summary-lhs.json')
@@ -26,12 +26,17 @@ const argv = UtilArgs.getArgv();
   // compare summary
   const compareSummary = UtilCompare.getCompareSummary(lhsFileSummary, rhsFileSummary)
 
+  // revalidate compare summary
+  const compareRevalidateQueueLhs = UtilQueue.createQueue({ concurrency: argv.n })
+  const compareRevalidateQueueRhs = UtilQueue.createQueue({ concurrency: argv.m })
+  const compareRevalidateSummary = await UtilCompare.revalidateCompareSummary(compareSummary, compareRevalidateQueueLhs, compareRevalidateQueueRhs)
+
   // save compare summary
   const compareSummaryOutputPath = UtilPath.resolve(argv.o, './compare-summary.json')
-  UtilFs.writeJson(compareSummaryOutputPath, compareSummary)
+  UtilFs.writeJson(compareSummaryOutputPath, compareRevalidateSummary)
 
   // compare report
-  const compareReport = UtilCompare.getCompareReport(compareSummary)
+  const compareReport = UtilCompare.getCompareReport(compareRevalidateSummary)
 
   // save compare report
   const compareReportOutputPath = UtilPath.resolve(argv.o, './compare-report.html')
