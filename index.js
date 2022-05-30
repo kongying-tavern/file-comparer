@@ -11,11 +11,11 @@ const argv = UtilArgs.getArgv();
   const lhsQueue = UtilQueue.createQueue({ concurrency: argv.n })
   const lhsFilePattern = UtilPath.resolve(argv.l, '**/*')
   const lhsFilePaths = await UtilPath.glob(lhsFilePattern)
-  const lhsFileSummary = UtilCompare.getFileSummary(argv.l, lhsFilePaths, lhsQueue)
+  const lhsFileSummary = await UtilCompare.getFileSummary(argv.l, lhsFilePaths, lhsQueue)
   const rhsQueue = UtilQueue.createQueue({ concurrency: argv.m })
   const rhsFilePattern = UtilPath.resolve(argv.r, '**/*')
   const rhsFilePaths = await UtilPath.glob(rhsFilePattern)
-  const rhsFileSummary = UtilCompare.getFileSummary(argv.r, rhsFilePaths, rhsQueue)
+  const rhsFileSummary = await UtilCompare.getFileSummary(argv.r, rhsFilePaths, rhsQueue)
 
   // save file summary
   const lhsFileSummaryOutputPath = UtilPath.resolve(argv.o, './file-summary-lhs.json')

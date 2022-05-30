@@ -3,7 +3,7 @@ import UtilPath from './path.js'
 import UtilHash from './hash.js'
 import UtilProgress from './progress.js'
 
-function getFileSummary (base = '', paths = [], queue = null) {
+async function getFileSummary (base = '', paths = [], queue = null) {
   const countTotal = paths.length
   const progress = UtilProgress.createProgressbar({ total: countTotal })
   const summary = []
@@ -26,6 +26,8 @@ function getFileSummary (base = '', paths = [], queue = null) {
       progress.tick()
     })
   })
+
+  await queue.onIdle()
 
   return summary
 }
