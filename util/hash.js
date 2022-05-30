@@ -27,13 +27,29 @@ function getHashByChunks (path = '', opts = {}) {
 }
 
 function getHashChunkPlots (opts = {}) {
-  const plots = []
+  let plots = []
   const name = opts.name || []
 
   if (name === 'single plot') {
     const offset = opts.offset
     const limit = opts.limit
     plots.push({ offset, limit })
+  } else if (name === 'distribution plots') {
+    const path = opts.file
+    const chunks = opts.chunks
+    const offset = opts.offset
+    const limit = opts.limit
+    const fd = FsExtra.openSync(path, 'r')
+    const fstat = FsExtra.fstatSync(fd)
+    const fsize = fstat.size
+
+    plots = _.map(_.times(10), v => {
+      const plotStart = Math.floor(v * fsize / chunks)
+      const plotOffset = plotStart + offset
+
+      return { offset: plotOffset, limit }
+    })
+    FsExtra.closeSync(fd)
   }
 
   return plots

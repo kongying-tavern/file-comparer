@@ -32,6 +32,42 @@ async function getFileSummary (base = '', paths = [], queue = null) {
   return summary
 }
 
+async function rehashFileSummary (files = [], queue = null) {
+  const countTotal = files.length
+  const progress = UtilProgress.createProgressbar({ total: countTotal })
+  const summary = []
+
+  _.each(files, async file => {
+    await queue.add(() => {
+      const path = file.path
+      const chunkConfig = UtilHash.getHashChunkPlots({
+        name: 'distribution plots',
+        file: path,
+        chunks: 10,
+        offset: 0,
+        limit: 10 * 1024
+      })
+      const filename = file.filename
+      const md5 = UtilHash.getHashByChunks(path, {
+        chunks: chunkConfig
+      })
+
+      const pack = {
+        path,
+        filename,
+        md5
+      }
+
+      summary.push(pack)
+      progress.tick()
+    })
+  })
+
+  await queue.onIdle()
+
+  return summary
+}
+
 function getCompareSummary (lhs = [], rhs = []) {
   const lhsMap = _.groupBy(lhs, 'md5')
   const lhsHashes = _.keys(lhsMap)
@@ -65,6 +101,21 @@ function getCompareSummary (lhs = [], rhs = []) {
   })
 
   return summary
+}
+
+async function revalidateCompareSummary (summary = [], lhsQueue = null, rhsQueue = null) {
+  const summaryUnsame = _.filter(summary, v => v.type !== 'same')
+  const summarySame = _.filter(summary, v => v.type === 'same')
+
+  const lhs = _.chain(summarySame).map(v => v.lhs || []).flattenDeep().value()
+  const lhsRehashed = await rehashFileSummary(lhs, lhsQueue)
+  const rhs = _.chain(summarySame).map(v => v.rhs || []).flattenDeep().value()
+  const rhsRehashed = await rehashFileSummary(rhs, rhsQueue)
+  const summaryRehashed = getCompareSummary(lhsRehashed, rhsRehashed)
+
+  const summaryNew = _.concat([], summaryUnsame, summaryRehashed)
+
+  return summaryNew
 }
 
 function getCompareReport (summary = []) {
@@ -195,6 +246,8 @@ function getCompareReport (summary = []) {
 
 export default {
   getFileSummary,
+  rehashFileSummary,
   getCompareSummary,
+  revalidateCompareSummary,
   getCompareReport
 }

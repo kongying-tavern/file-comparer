@@ -26,12 +26,17 @@ const argv = UtilArgs.getArgv();
   // compare summary
   const compareSummary = UtilCompare.getCompareSummary(lhsFileSummary, rhsFileSummary)
 
+  // revalidate compare summary
+  const compareRevalidateQueueLhs = UtilQueue.createQueue({ concurrency: argv.n })
+  const compareRevalidateQueueRhs = UtilQueue.createQueue({ concurrency: argv.m })
+  const compareRevalidateSummary = await UtilCompare.revalidateCompareSummary(compareSummary, compareRevalidateQueueLhs, compareRevalidateQueueRhs)
+
   // save compare summary
   const compareSummaryOutputPath = UtilPath.resolve(argv.o, './compare-summary.json')
-  UtilFs.writeJson(compareSummaryOutputPath, compareSummary)
+  UtilFs.writeJson(compareSummaryOutputPath, compareRevalidateSummary)
 
   // compare report
-  const compareReport = UtilCompare.getCompareReport(compareSummary)
+  const compareReport = UtilCompare.getCompareReport(compareRevalidateSummary)
 
   // save compare report
   const compareReportOutputPath = UtilPath.resolve(argv.o, './compare-report.html')
