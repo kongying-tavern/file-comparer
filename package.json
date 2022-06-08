@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "scripts": {
     "commit": "cz",
     "compare": "node index.js",
@@ -51,5 +51,8 @@
       "@semantic-release/release-notes-generator",
       "@semantic-release/github"
     ]
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
