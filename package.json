@@ -11,6 +11,13 @@
     "lint": "eslint --ext .js .",
     "release": "semantic-release"
   },
+  "description": "Compare file differences between two directories and generate report",
+  "keywords": [
+    "backend",
+    "cli",
+    "kongying-cli-plugin",
+    "kongying-cmd-compare"
+  ],
   "dependencies": {
     "fs-extra": "^10.0.1",
     "globby": "^13.1.1",
