@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>文件比对结果</title>
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/element-ui@2.15.6/packages/theme-chalk/lib/index.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.6/theme-chalk/index.css">
 </head>
 <body>
     <div id="app">
@@ -52,9 +52,9 @@
         </el-table>
     </div>
 
-    <script type="text/javascript" src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/element-ui@2.15.6/lib/index.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/lodash@4.17.21/lodash.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.14/vue.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.6/index.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script type="text/javascript">
     new Vue({
         el: '#app',
