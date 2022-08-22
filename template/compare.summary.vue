@@ -9,9 +9,9 @@
 <body>
     <div id="app">
         <el-card>
-            <el-select v-model="filterTypes" multiple>
+            <el-select v-model="state.filterTypes" multiple>
                 <el-option
-                    v-for="(item, i) in filterOptions"
+                    v-for="(item, i) in plugins.typeOptions"
                     :key="i"
                     :label="item.label"
                     :value="item.value">
@@ -34,8 +34,8 @@
                 <template slot-scope="scope">
                     <el-button
                         size="medium"
-                        :type="scope.row.typeColorClass"
-                        :icon="scope.row.typeIcon"
+                        :type="scope.row.typeOption.type"
+                        :icon="scope.row.typeOption.icon"
                         circle>
                     </el-button>
                 </template>
@@ -54,61 +54,65 @@
 
     <script type="text/javascript" src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
     <script type="text/javascript" src="https://unpkg.com/element-ui@2.15.6/lib/index.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/lodash@4.17.21/lodash.min.js"></script>
     <script type="text/javascript">
     new Vue({
         el: '#app',
         data() {
             return {
                 compareData: {{__ summary __}},
-                filterTypes: ['add', 'remove', 'same'],
-                filterOptions: [
-                    {
-                        label: '新增',
-                        value: 'add'
-                    },
-                    {
-                        label: '删除',
-                        value: 'remove'
-                    },
-                    {
-                        label: '相同',
-                        value: 'same'
-                    }
-                ]
+                state: {
+                    filterTypes: ['add', 'remove', 'same'],
+                },
+                plugins: {
+                    typeOptions: [
+                        {
+                            label: '新增',
+                            value: 'add',
+                            type: 'success',
+                            icon: 'el-icon-star-off'
+                        },
+                        {
+                            label: '删除',
+                            value: 'remove',
+                            type: 'danger',
+                            icon: 'el-icon-delete'
+                        },
+                        {
+                            label: '相同',
+                            value: 'same',
+                            type: 'info',
+                            icon: 'el-icon-more-outline'
+                        }
+                    ]
+                }
             }
         },
         computed: {
             compareDataFiltered() {
-                const typeConfig = {
-                    add: {
-                        type: 'success',
-                        icon: 'el-icon-star-off'
-                    },
-                    remove: {
-                        type: 'danger',
-                        icon: 'el-icon-delete'
-                    },
-                    same: {
-                        type: 'info',
-                        icon: 'el-icon-more-outline'
-                    }
-                }
+                let list = this.compareData || [];
+                list = this.applyTypeFilter(list);
+                list = this.applyTypeMapper(list);
 
-                let data = this.compareData || []
-                data = data.map(v => {
-                    let type = v.type || ''
-                    let typeConf =  typeConfig[type] || {}
-                    let typeColorClass  = typeConf.type || ''
-                    let typeIcon = typeConf.icon || ''
+                return list;
+            }
+        },
+        methods: {
+            applyTypeFilter(list = []) {
+                return list;
+            },
+            applyTypeMapper(list = []) {
+                let typeOptionMap = _.keyBy(this.plugins.typeOptions, 'value');
+                let listMapped = _.map(list, v => {
+                    let typeKey = v.type || '';
+                    let typeOption = typeOptionMap[typeKey] || {};
 
-                    v.typeColorClass = typeColorClass
-                    v.typeIcon = typeIcon
+                    v.typeOption = typeOption;
 
-                    return v
-                })
-                data = data.filter(v => this.filterTypes.indexOf(v.type) !== -1)
+                    return v;
+                });
 
-                return data
+                return listMapped;
             }
         }
     })
