@@ -1,5 +1,14 @@
 import Path from 'path';
+import Url from 'url';
 import { globby as Globby } from 'globby';
+
+function fromUrl (url = {}) {
+    return Url.fileURLToPath(url);
+}
+
+function toUrl (path = '') {
+    return Url.pathToFileURL(path);
+}
 
 function resolve (...args) {
     return Path.resolve(...args);
@@ -17,6 +26,8 @@ async function glob (pattern = '') {
 }
 
 export default {
+    fromUrl,
+    toUrl,
     resolve,
     relative,
     glob
