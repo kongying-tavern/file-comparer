@@ -91,16 +91,13 @@
         computed: {
             compareDataFiltered() {
                 let list = this.compareData || [];
-                list = this.applyTypeFilter(list);
                 list = this.applyTypeMapper(list);
+                list = this.applyTypeFilter(list);
 
                 return list;
             }
         },
         methods: {
-            applyTypeFilter(list = []) {
-                return list;
-            },
             applyTypeMapper(list = []) {
                 let typeOptionMap = _.keyBy(this.plugins.typeOptions, 'value');
                 let listMapped = _.map(list, v => {
@@ -113,6 +110,11 @@
                 });
 
                 return listMapped;
+            },
+            applyTypeFilter(list = []) {
+                let listFiltered = _.filter(list, v => this.state.filterTypes.indexOf(v.type) !== -1);
+
+                return listFiltered;
             }
         }
     })
