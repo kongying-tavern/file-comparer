@@ -92,10 +92,13 @@
 
         <el-table-column
           label="数字签名"
-          prop="hash"
-          sortable>
+          sortable
+          sort-by="hash">
         </el-table-column>
-        <el-table-column label="左侧文件名">
+        <el-table-column
+          label="左侧文件名"
+          sortable
+          sort-by="lhs.0.filename">
           <template slot-scope="scope">
             <template v-if="scope.row.lhs && scope.row.lhs.length > 0">
               <div v-for="(item, i) in scope.row.lhs" :key="i">
@@ -106,7 +109,9 @@
         </el-table-column>
         <el-table-column
           width="100"
-          align="center">
+          align="center"
+          sortable
+          sort-by="type">
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -116,7 +121,10 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="右侧侧文件名">
+        <el-table-column
+          label="右侧侧文件名"
+          sortable
+          sort-by="rhs.0.filename">
           <template slot-scope="scope">
             <template v-if="scope.row.rhs && scope.row.rhs.length > 0">
               <div v-for="(item, i) in scope.row.rhs" :key="i">
