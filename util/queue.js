@@ -1,9 +1,9 @@
-import PQueue from 'p-queue'
+import PQueue from 'p-queue';
 
 function createQueue (opts = {}) {
-  return new PQueue(opts)
+    return new PQueue(opts);
 }
 
 export default {
-  createQueue
-}
+    createQueue
+};

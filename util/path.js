@@ -1,23 +1,34 @@
-import Path from 'path'
-import { globby as Globby } from 'globby'
+import Path from 'path';
+import Url from 'url';
+import { globby as Globby } from 'globby';
+
+function fromUrl (url = {}) {
+    return Url.fileURLToPath(url);
+}
+
+function toUrl (path = '') {
+    return Url.pathToFileURL(path);
+}
 
 function resolve (...args) {
-  return Path.resolve(...args)
+    return Path.resolve(...args);
 }
 
 function relative (base = '', path = '') {
-  return Path.relative(base, path)
+    return Path.relative(base, path);
 }
 
 async function glob (pattern = '') {
-  pattern = pattern || ''
-  pattern = pattern.replace(/\\/g, '/')
+    pattern = pattern || '';
+    pattern = pattern.replace(/\\/g, '/');
 
-  return Globby(pattern)
+    return Globby(pattern);
 }
 
 export default {
-  resolve,
-  relative,
-  glob
-}
+    fromUrl,
+    toUrl,
+    resolve,
+    relative,
+    glob
+};

@@ -4,13 +4,20 @@
   "main": "index.js",
   "type": "module",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "scripts": {
     "commit": "cz",
     "compare": "node index.js",
-    "lint": "eslint --ext .js .",
+    "lint": "eslint --ext .js,.ts .",
     "release": "semantic-release"
   },
+  "description": "Compare file differences between two directories and generate report",
+  "keywords": [
+    "backend",
+    "cli",
+    "kongying-cli-plugin",
+    "kongying-cmd-compare"
+  ],
   "dependencies": {
     "fs-extra": "^10.0.1",
     "globby": "^13.1.1",
@@ -21,6 +28,8 @@
     "yargs": "^17.3.1"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.27.1",
+    "@typescript-eslint/parser": "^5.27.1",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "3.3.0",
     "eslint": "^7.32.0",
@@ -44,5 +53,8 @@
       "@semantic-release/release-notes-generator",
       "@semantic-release/github"
     ]
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
