@@ -1,10 +1,9 @@
 {
-  "name": "file-compare",
+  "name": "@kongying-tavern/file-compare",
   "version": "0.0.0",
   "main": "index.js",
   "type": "module",
   "license": "MIT",
-  "private": false,
   "scripts": {
     "commit": "cz",
     "compare": "node index.js",
