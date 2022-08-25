@@ -8,7 +8,8 @@
     "commit": "cz",
     "compare": "node index.js",
     "lint": "eslint --ext .js,.ts .",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "yalc": "yalc publish"
   },
   "description": "Compare file differences between two directories and generate report",
   "keywords": [
