@@ -79,6 +79,9 @@
         circle
         @click="popupFilterDrawer">
       </el-button>
+      <div>
+        <template v-for="(type, index) in typeOptions"></template>
+      </div>
     </div>
 
     <div class="table-wrapper">
