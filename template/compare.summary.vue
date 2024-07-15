@@ -25,6 +25,15 @@
   .action-wrapper {
     flex: none;
     margin-bottom: .7rem;
+    display: flex;
+    gap: .2rem;
+    align-items: center;
+  }
+  .action-wrapper .wrapper {
+    flex: auto;
+  }
+  .action-wrapper .summary {
+    flex: none;
   }
   .table-wrapper {
     position: relative;
@@ -71,34 +80,48 @@
       </el-form>
     </el-drawer>
 
+    <!-- Action Tools -->
     <div class="action-wrapper">
-      <el-button
-        size="mini"
-        type="info"
-        icon="el-icon-search"
-        circle
-        @click="popupFilterDrawer">
-      </el-button>
+      <div class="wrapper">
+        <el-button
+          size="mini"
+          type="info"
+          icon="el-icon-search"
+          circle
+          @click="popupFilterDrawer">
+        </el-button>
+      </div>
+      <div class="summary">
+        <template v-for="(type, index) in plugins.typeOptions">
+          {{type.label}}
+          <el-tag type="primary">{{dataTypeCount[type.value] ?? 0}}</el-tag>
+        </template>
+      </div>
     </div>
 
+    <!-- Table -->
     <div class="table-wrapper">
       <el-table
         class="table-component"
         :data="compareDataFiltered"
         size="mini"
         border
-        height="auto">
+        height="auto"
+        @sort-change="sortChange">
         <el-empty slot="empty" description="暂无数据"></el-empty>
 
         <el-table-column
           label="数字签名"
-          sortable
-          sort-by="hash">
+          sortable="custom"
+          prop="hash">
+          <template slot-scope="scope">
+            {{scope.row.hash}}
+          </template>
         </el-table-column>
         <el-table-column
           label="左侧文件名"
-          sortable
-          sort-by="lhs.0.filename">
+          sortable="custom"
+          prop="lhs">
           <template slot-scope="scope">
             <template v-if="scope.row.lhs && scope.row.lhs.length > 0">
               <div v-for="(item, i) in scope.row.lhs" :key="i">
@@ -110,8 +133,8 @@
         <el-table-column
           width="100"
           align="center"
-          sortable
-          sort-by="type">
+          sortable="custom"
+          prop="type">
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -123,8 +146,8 @@
         </el-table-column>
         <el-table-column
           label="右侧侧文件名"
-          sortable
-          sort-by="rhs.0.filename">
+          sortable="custom"
+          prop="rhs">
           <template slot-scope="scope">
             <template v-if="scope.row.rhs && scope.row.rhs.length > 0">
               <div v-for="(item, i) in scope.row.rhs" :key="i">
@@ -140,12 +163,14 @@
   <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.14/vue.min.js"></script>
   <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.6/index.js"></script>
   <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/natural-compare-lite@1.4.0/index.js"></script>
   <script type="text/javascript">
+  const initData = {{__ summary __}};
   new Vue({
     el: '#app',
     data() {
       return {
-        compareData: {{__ summary __}},
+        compareDataSorted: [],
         state: {
           filterDrawerVisible: false,
           filterTypes: ['add', 'remove', 'same'],
@@ -176,12 +201,21 @@
     },
     computed: {
       compareDataFiltered() {
-        let list = this.compareData || [];
+        let list = this.compareDataSorted || [];
         list = this.applyTypeMapper(list);
         list = this.applyTypeFilter(list);
 
         return list;
+      },
+      dataTypeCount() {
+        return _.reduce(initData, (res, val, key) => {
+          res[val.type] = (res[val.type] ?? 0) + 1;
+          return res;
+        }, {});
       }
+    },
+    mounted() {
+      this.compareDataSorted = _.cloneDeep(initData);
     },
     methods: {
       // popups / popdowns
@@ -206,6 +240,62 @@
         let listFiltered = _.filter(list, v => this.state.filterTypes.indexOf(v.type) !== -1);
 
         return listFiltered;
+      },
+      // Sorter
+      sortNatualCompare(a, b, order) {
+        const compareRes = naturalCompare(a, b);
+        switch(order) {
+          case 'ascending':
+            return compareRes;
+          case 'descending':
+            return -compareRes;
+          default:
+            return 0;
+        }
+      },
+      sortStringCompare(a, b, order) {
+        let compareRes = 0;
+        if(a > b) {
+          compareRes = -1;
+        } else if(a < b) {
+          compareRes = 1;
+        }
+        switch(order) {
+          case 'ascending':
+            return compareRes;
+          case 'descending':
+            return -compareRes;
+          default:
+            return 0;
+        }
+      },
+      sortChange({ column, prop, order }) {
+        const list = _.cloneDeep(initData);
+        if(prop === 'lhs') {
+          this.compareDataSorted = list.sort((a, b) => {
+            const aName = _.get(a, 'lhs.0.filename', '');
+            const bName = _.get(b, 'lhs.0.filename', '');
+            return this.sortNatualCompare(aName, bName, order);
+          });
+        } else if(prop === 'rhs') {
+          this.compareDataSorted = list.sort((a, b) => {
+            const aName = _.get(a, 'rhs.0.filename', '');
+            const bName = _.get(b, 'rhs.0.filename', '');
+            return this.sortNatualCompare(aName, bName, order);
+          });
+        } else if(prop === 'type') {
+          this.compareDataSorted = list.sort((a, b) => {
+            const aType = _.get(a, 'type', '');
+            const bType = _.get(b, 'type', '');
+            return this.sortStringCompare(aType, bType, order);
+          });
+        } else if(prop === 'hash') {
+          this.compareDataSorted = list.sort((a, b) => {
+            const aHash = _.get(a, 'hash', '');
+            const bHash = _.get(b, 'hash', '');
+            return this.sortStringCompare(aHash, bHash, order);
+          });
+        }
       }
     }
   })

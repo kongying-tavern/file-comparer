@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import StringNaturalCompare from 'string-natural-compare';
 import UtilFs from './fs.js';
 import UtilPath from './path.js';
 import UtilHash from './hash.js';
@@ -6,15 +7,21 @@ import UtilProgress from './progress.js';
 
 const currentPath = UtilPath.fromUrl(import.meta.url);
 
-async function getFileSummary (base = '', paths = [], queue = null) {
+async function getFileSummary(base = '', paths = [], queue = null) {
     const countTotal = paths.length;
     const progress = UtilProgress.createProgressbar({ total: countTotal });
     const summary = [];
-    const hashChunkConfig = UtilHash.getHashChunkPlots({ name: 'single plot', offset: 0, limit: 100 * 1024 });
 
     _.each(paths, async path => {
         await queue.add(() => {
             const filename = UtilPath.relative(base, path);
+            const hashChunkConfig = UtilHash.getHashChunkPlots({
+                name: 'distribution plots',
+                file: path,
+                chunks: 10,
+                offset: 0,
+                limit: 100 * 1024
+            });
             const md5 = UtilHash.getHashByChunks(path, {
                 chunks: hashChunkConfig
             });
@@ -35,7 +42,7 @@ async function getFileSummary (base = '', paths = [], queue = null) {
     return summary;
 }
 
-async function rehashFileSummary (files = [], queue = null) {
+async function rehashFileSummary(files = [], queue = null) {
     const countTotal = files.length;
     const progress = UtilProgress.createProgressbar({ total: countTotal });
     const summary = [];
@@ -46,7 +53,7 @@ async function rehashFileSummary (files = [], queue = null) {
             const chunkConfig = UtilHash.getHashChunkPlots({
                 name: 'distribution plots',
                 file: path,
-                chunks: 10,
+                chunks: 100,
                 offset: 0,
                 limit: 10 * 1024
             });
@@ -71,7 +78,7 @@ async function rehashFileSummary (files = [], queue = null) {
     return summary;
 }
 
-function getCompareSummary (lhs = [], rhs = []) {
+function getCompareSummary(lhs = [], rhs = []) {
     const lhsMap = _.groupBy(lhs, 'md5');
     const lhsHashes = _.keys(lhsMap);
     const rhsMap = _.groupBy(rhs, 'md5');
@@ -106,7 +113,7 @@ function getCompareSummary (lhs = [], rhs = []) {
     return summary;
 }
 
-async function revalidateCompareSummary (summary = [], lhsQueue = null, rhsQueue = null) {
+async function revalidateCompareSummary(summary = [], lhsQueue = null, rhsQueue = null) {
     const summaryUnsame = _.filter(summary, v => v.type !== 'same');
     const summarySame = _.filter(summary, v => v.type === 'same');
 
@@ -121,7 +128,17 @@ async function revalidateCompareSummary (summary = [], lhsQueue = null, rhsQueue
     return summaryNew;
 }
 
-function getCompareReport (summary = []) {
+function resortCompareSummary(summary = []) {
+    return _.map(summary, v => {
+        const lhs = _.chain(v.lhs || []).flattenDeep().value().sort((a, b) => StringNaturalCompare(a.filename, b.filename));
+        const rhs = _.chain(v.rhs || []).flattenDeep().value().sort((a, b) => StringNaturalCompare(a.filename, b.filename));
+        v.lhs = lhs;
+        v.rhs = rhs;
+        return v;
+    });
+}
+
+function getCompareReport(summary = []) {
     const templatePath = UtilPath.resolve(currentPath, '../../template/compare.summary.vue');
     const template = UtilFs.readFile(templatePath);
     const renderer = _.template(template, {
@@ -136,5 +153,6 @@ export default {
     rehashFileSummary,
     getCompareSummary,
     revalidateCompareSummary,
+    resortCompareSummary,
     getCompareReport
 };

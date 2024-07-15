@@ -31,9 +31,12 @@ const argv = UtilArgs.getArgv();
     const compareRevalidateQueueRhs = UtilQueue.createQueue({ concurrency: argv.m });
     const compareRevalidateSummary = await UtilCompare.revalidateCompareSummary(compareSummary, compareRevalidateQueueLhs, compareRevalidateQueueRhs);
 
+    // resort compare summary
+    const compareResortSummary = UtilCompare.resortCompareSummary(compareRevalidateSummary);
+
     // save compare summary
     const compareSummaryOutputPath = UtilPath.resolve(argv.o, './compare-summary.json');
-    UtilFs.writeJson(compareSummaryOutputPath, compareRevalidateSummary);
+    UtilFs.writeJson(compareSummaryOutputPath, compareResortSummary);
 
     // compare report
     const compareReport = UtilCompare.getCompareReport(compareRevalidateSummary);
