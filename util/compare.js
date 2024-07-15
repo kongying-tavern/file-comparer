@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import StringNaturalCompare from 'string-natural-compare';
 import UtilFs from './fs.js';
 import UtilPath from './path.js';
 import UtilHash from './hash.js';
@@ -127,6 +128,16 @@ async function revalidateCompareSummary(summary = [], lhsQueue = null, rhsQueue 
     return summaryNew;
 }
 
+function resortCompareSummary(summary = []) {
+    return _.map(summary, v => {
+        const lhs = _.chain(v.lhs || []).flattenDeep().sortBy((a, b) => a && b && StringNaturalCompare(a.filename, b.filename)).value();
+        const rhs = _.chain(v.rhs || []).flattenDeep().sortBy((a, b) => a && b && StringNaturalCompare(a.filename, b.filename)).value();
+        v.lhs = lhs;
+        v.rhs = rhs;
+        return v;
+    });
+}
+
 function getCompareReport(summary = []) {
     const templatePath = UtilPath.resolve(currentPath, '../../template/compare.summary.vue');
     const template = UtilFs.readFile(templatePath);
@@ -142,5 +153,6 @@ export default {
     rehashFileSummary,
     getCompareSummary,
     revalidateCompareSummary,
+    resortCompareSummary,
     getCompareReport
 };

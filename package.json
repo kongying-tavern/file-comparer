@@ -25,6 +25,7 @@
     "md5": "^2.3.0",
     "p-queue": "^7.2.0",
     "progress": "^2.0.3",
+    "string-natural-compare": "^3.0.1",
     "yargs": "^17.3.1"
   },
   "devDependencies": {
@@ -56,5 +57,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "packageManager": "pnpm@8.10.0+sha512.9c2cb83f2b6cf6a25d8c58300bf99197c7ef3be84cf3e766f29054b40b83b42f8aaba6fcc314a9ecf27c00f7ce80a757bb4c608800e7adbe2d29dc5c7056f5be"
 }
