@@ -25,6 +25,15 @@
   .action-wrapper {
     flex: none;
     margin-bottom: .7rem;
+    display: flex;
+    gap: .2rem;
+    align-items: center;
+  }
+  .action-wrapper .wrapper {
+    flex: auto;
+  }
+  .action-wrapper .summary {
+    flex: none;
   }
   .table-wrapper {
     position: relative;
@@ -71,19 +80,26 @@
       </el-form>
     </el-drawer>
 
+    <!-- Action Tools -->
     <div class="action-wrapper">
-      <el-button
-        size="mini"
-        type="info"
-        icon="el-icon-search"
-        circle
-        @click="popupFilterDrawer">
-      </el-button>
-      <div>
-        <template v-for="(type, index) in typeOptions"></template>
+      <div class="wrapper">
+        <el-button
+          size="mini"
+          type="info"
+          icon="el-icon-search"
+          circle
+          @click="popupFilterDrawer">
+        </el-button>
+      </div>
+      <div class="summary">
+        <template v-for="(type, index) in plugins.typeOptions">
+          {{type.label}}
+          <el-tag type="primary">{{dataTypeCount[type.value] ?? 0}}</el-tag>
+        </template>
       </div>
     </div>
 
+    <!-- Table -->
     <div class="table-wrapper">
       <el-table
         class="table-component"
@@ -97,6 +113,9 @@
           label="数字签名"
           sortable
           sort-by="hash">
+          <template slot-scope="scope">
+            {{scope.row.hash}}
+          </template>
         </el-table-column>
         <el-table-column
           label="左侧文件名"
@@ -184,6 +203,12 @@
         list = this.applyTypeFilter(list);
 
         return list;
+      },
+      dataTypeCount() {
+        return _.reduce(this.compareData, (res, val, key) => {
+          res[val.type] = (res[val.type] ?? 0) + 1;
+          return res;
+        }, {});
       }
     },
     methods: {
