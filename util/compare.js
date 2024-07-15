@@ -14,10 +14,10 @@ async function getFileSummary(base = '', paths = [], queue = null) {
 
     _.each(paths, async path => {
         await queue.add(() => {
-            const filename = UtilPath.resolve(base, path);
+            const filename = UtilPath.relative(base, path);
             const hashChunkConfig = UtilHash.getHashChunkPlots({
                 name: 'distribution plots',
-                file: filename,
+                file: path,
                 chunks: 10,
                 offset: 0,
                 limit: 100 * 1024
