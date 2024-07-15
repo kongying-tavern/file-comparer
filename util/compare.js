@@ -130,8 +130,8 @@ async function revalidateCompareSummary(summary = [], lhsQueue = null, rhsQueue 
 
 function resortCompareSummary(summary = []) {
     return _.map(summary, v => {
-        const lhs = _.chain(v.lhs || []).flattenDeep().sortBy((a, b) => a && b && StringNaturalCompare(a.filename, b.filename)).value();
-        const rhs = _.chain(v.rhs || []).flattenDeep().sortBy((a, b) => a && b && StringNaturalCompare(a.filename, b.filename)).value();
+        const lhs = _.chain(v.lhs || []).flattenDeep().value().sort((a, b) => StringNaturalCompare(a.filename, b.filename));
+        const rhs = _.chain(v.rhs || []).flattenDeep().value().sort((a, b) => StringNaturalCompare(a.filename, b.filename));
         v.lhs = lhs;
         v.rhs = rhs;
         return v;
