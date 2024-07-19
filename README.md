@@ -9,7 +9,7 @@
 
 2. 在 [Node.js](https://nodejs.org/en/) 站点下载 Node.js 并安装
 
-   1. 建议版本 >= 14
+   1. 建议版本 >= 18
    2. 不建议安装奇数版本，如 13、15、17，奇数版本由于没有充分的进行测试，为不稳定版本
 
 3. 安装 Node.js 之后，打开命令提示符，依次输入：
@@ -17,17 +17,20 @@
    ```bash
    node -v
    npm --version
+   corepack --version
    ```
 
-   此操作会输出两个版本号，表示安装成功，如果没有版本号输出请重新安装 Node.js
+   此操作会输出三个版本号，表示安装成功，如果没有版本号输出请重新安装 Node.js
 
-4. 鉴于 `npm` 工具使用存在一些问题，推荐使用 `yarn` 工具，打开命令提示符，输入以下命令并等待安装完成：
+4. 此处推荐使用 `pnpm` 工具。高版本 `Node.js` 自带 `pnpm`，但需手动开启。打开命令提示符，输入以下命令以开启 `pnpm`：
 
    ```bash
-   npm i -g yarn
+   corepack enable
    ```
 
-5. **注**：此文档中会提供 `npm` 和 `yarn` 两套命令，根据你使用的工具，只需执行其中一句即可
+5. **注**：
+   - `npm` 为 `Node.js` 的包管理工具；此外，上述步骤会开启 `yarn` 和 `pnpm` 包管理工具。
+   - 此文档中会提供 `npm`、`pnpm` 和 `yarn` 三套命令，根据你使用的工具，只需执行其中一句即可。
 
 ## 使用方法
 1. Windows 下打开命令提示符（`CMD.exe`），Linux / Unix / MacOS 下打开终端，使用 `cd` 命令切换到解压后的工具目录
@@ -41,6 +44,7 @@
 
    ```bash
    npm i
+   pnpm i
    yarn install
    ```
 
@@ -48,6 +52,7 @@
 
    ```bash
    npm run compare -- ...参数
+   pnpm run compare ...参数
    yarn compare ...参数
 
    ```
