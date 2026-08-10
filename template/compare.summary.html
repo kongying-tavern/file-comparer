@@ -1,79 +1,72 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>文件比对结果</title>
-  <link rel="stylesheet" type="text/css" href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.6/theme-chalk/index.css">
+  <link rel="stylesheet" type="text/css"
+    href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.6/theme-chalk/index.css">
   <style type="text/css">
-  #app {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: .7rem;
-  }
-  .drawer-wrapper {
-    padding: 0 1rem;
-  }
-  .form-component {
-    width: 100%;
-  }
-  .action-wrapper {
-    flex: none;
-    margin-bottom: .7rem;
-    display: flex;
-    gap: .2rem;
-    align-items: center;
-  }
-  .action-wrapper .wrapper {
-    flex: auto;
-  }
-  .action-wrapper .summary {
-    flex: none;
-  }
-  .table-wrapper {
-    position: relative;
-    flex: auto;
-  }
-  .table-component {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
+    #app {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: .7rem;
+    }
+
+    .drawer-wrapper {
+      padding: 0 1rem;
+    }
+
+    .form-component {
+      width: 100%;
+    }
+
+    .action-wrapper {
+      flex: none;
+      margin-bottom: .7rem;
+      display: flex;
+      gap: .2rem;
+      align-items: center;
+    }
+
+    .action-wrapper .wrapper {
+      flex: auto;
+    }
+
+    .action-wrapper .summary {
+      flex: none;
+    }
+
+    .table-wrapper {
+      position: relative;
+      flex: auto;
+    }
+
+    .table-component {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
   </style>
 </head>
+
 <body>
   <div id="app">
     <!-- Popups -->
-    <el-drawer
-      :visible.sync="state.filterDrawerVisible"
-      title="过滤筛选"
-      direction="rtl"
-      size="40%"
-      :wrapperClosable="false"
-      append-to-body
-      modal-append-to-body>
-      <el-form
-        class="drawer-wrapper"
-        size="mini"
-        label-position="left"
-        label-width="100px">
+    <el-drawer :visible.sync="state.filterDrawerVisible" title="过滤筛选" direction="rtl" size="40%"
+      :wrapperClosable="false" append-to-body modal-append-to-body>
+      <el-form class="drawer-wrapper" size="mini" label-position="left" label-width="100px">
         <el-form-item label="差异类型">
-          <el-select
-            v-model="state.filterTypes"
-            class="form-component"
-            multiple>
-            <el-option
-              v-for="(item, i) in plugins.typeOptions"
-              :key="i"
-              :label="item.label"
-              :value="item.value">
+          <el-select v-model="state.filterTypes" class="form-component" multiple>
+            <el-option v-for="(item, i) in plugins.typeOptions" :key="i" :label="item.label" :value="item.value">
             </el-option>
           </el-select>
         </el-form-item>
@@ -83,12 +76,7 @@
     <!-- Action Tools -->
     <div class="action-wrapper">
       <div class="wrapper">
-        <el-button
-          size="mini"
-          type="info"
-          icon="el-icon-search"
-          circle
-          @click="popupFilterDrawer">
+        <el-button size="mini" type="info" icon="el-icon-search" circle @click="popupFilterDrawer">
         </el-button>
       </div>
       <div class="summary">
@@ -101,27 +89,16 @@
 
     <!-- Table -->
     <div class="table-wrapper">
-      <el-table
-        class="table-component"
-        :data="compareDataFiltered"
-        size="mini"
-        border
-        height="auto"
+      <el-table class="table-component" :data="compareDataFiltered" size="mini" border height="auto"
         @sort-change="sortChange">
         <el-empty slot="empty" description="暂无数据"></el-empty>
 
-        <el-table-column
-          label="数字签名"
-          sortable="custom"
-          prop="hash">
+        <el-table-column label="数字签名" sortable="custom" prop="hash">
           <template slot-scope="scope">
             {{scope.row.hash}}
           </template>
         </el-table-column>
-        <el-table-column
-          label="左侧文件名"
-          sortable="custom"
-          prop="lhs">
+        <el-table-column label="左侧文件名" sortable="custom" prop="lhs">
           <template slot-scope="scope">
             <template v-if="scope.row.lhs && scope.row.lhs.length > 0">
               <div v-for="(item, i) in scope.row.lhs" :key="i">
@@ -130,24 +107,13 @@
             </template>
           </template>
         </el-table-column>
-        <el-table-column
-          width="100"
-          align="center"
-          sortable="custom"
-          prop="type">
+        <el-table-column width="100" align="center" sortable="custom" prop="type">
           <template slot-scope="scope">
-            <el-button
-              size="mini"
-              :type="scope.row.typeOption.type"
-              :icon="scope.row.typeOption.icon"
-              circle>
+            <el-button size="mini" :type="scope.row.typeOption.type" :icon="scope.row.typeOption.icon" circle>
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column
-          label="右侧侧文件名"
-          sortable="custom"
-          prop="rhs">
+        <el-table-column label="右侧侧文件名" sortable="custom" prop="rhs">
           <template slot-scope="scope">
             <template v-if="scope.row.rhs && scope.row.rhs.length > 0">
               <div v-for="(item, i) in scope.row.rhs" :key="i">
@@ -165,143 +131,144 @@
   <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
   <script type="text/javascript" src="https://unpkg.com/natural-compare-lite@1.4.0/index.js"></script>
   <script type="text/javascript">
-  /** === DATA AREA START === */
-  const initData = [{ "type": "same", "hash": "a7f3b9c2d1e8f4a6b0c5d2e9f3a8b1c4d7e0f6a2", "lhs": [{ "path": "/mnt/nas/media/2024/videos", "filename": "report_q3_final_v2.mp4", "md5": "8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a" }], "rhs": [{ "path": "/mnt/backup/2024/videos", "filename": "report_q3_final_v2.mp4", "md5": "8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a" }] }, { "type": "add", "hash": "b8c4d5e6f7a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4", "lhs": [], "rhs": [{ "path": "/data/incoming/uploads", "filename": "IMG_20240518_143022.jpg", "md5": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d" }] }, { "type": "remove", "hash": "c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8", "lhs": [{ "path": "/var/log/archives", "filename": "syslog_20231105.tar.gz", "md5": "f1e2d3c4b5a69788796a5b4c3d2e1f0a" }], "rhs": [] }, { "type": "same", "hash": "d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0", "lhs": [{ "path": "/home/user/documents", "filename": "meeting_notes.docx", "md5": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6" }], "rhs": [{ "path": "/mnt/cloud/docs", "filename": "meeting_notes.docx", "md5": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6" }] }, { "type": "add", "hash": "e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1", "lhs": [], "rhs": [{ "path": "/tmp/extracted", "filename": "dataset_part4.csv", "md5": "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d" }] }, { "type": "remove", "hash": "f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2", "lhs": [{ "path": "/opt/app/cache", "filename": "temp_render_8842.tmp", "md5": "0f1e2d3c4b5a69788796a5b4c3d2e1f0" }], "rhs": [] }];
-  /** === DATA AREA END === */
+    /** === DATA AREA START === */
+    const initData = [{ "type": "same", "hash": "a7f3b9c2d1e8f4a6b0c5d2e9f3a8b1c4d7e0f6a2", "lhs": [{ "path": "/mnt/nas/media/2024/videos", "filename": "report_q3_final_v2.mp4", "md5": "8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a" }], "rhs": [{ "path": "/mnt/backup/2024/videos", "filename": "report_q3_final_v2.mp4", "md5": "8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a" }] }, { "type": "add", "hash": "b8c4d5e6f7a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4", "lhs": [], "rhs": [{ "path": "/data/incoming/uploads", "filename": "IMG_20240518_143022.jpg", "md5": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d" }] }, { "type": "remove", "hash": "c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8", "lhs": [{ "path": "/var/log/archives", "filename": "syslog_20231105.tar.gz", "md5": "f1e2d3c4b5a69788796a5b4c3d2e1f0a" }], "rhs": [] }, { "type": "same", "hash": "d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0", "lhs": [{ "path": "/home/user/documents", "filename": "meeting_notes.docx", "md5": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6" }], "rhs": [{ "path": "/mnt/cloud/docs", "filename": "meeting_notes.docx", "md5": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6" }] }, { "type": "add", "hash": "e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1", "lhs": [], "rhs": [{ "path": "/tmp/extracted", "filename": "dataset_part4.csv", "md5": "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d" }] }, { "type": "remove", "hash": "f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2", "lhs": [{ "path": "/opt/app/cache", "filename": "temp_render_8842.tmp", "md5": "0f1e2d3c4b5a69788796a5b4c3d2e1f0" }], "rhs": [] }];
+    /** === DATA AREA END === */
 
-  new Vue({
-    el: '#app',
-    data() {
-      return {
-        compareDataSorted: [],
-        state: {
-          filterDrawerVisible: false,
-          filterTypes: ['add', 'remove', 'same'],
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          compareDataSorted: [],
+          state: {
+            filterDrawerVisible: false,
+            filterTypes: ['add', 'remove', 'same'],
+          },
+          plugins: {
+            typeOptions: [
+              {
+                label: '新增',
+                value: 'add',
+                type: 'success',
+                icon: 'el-icon-star-off'
+              },
+              {
+                label: '删除',
+                value: 'remove',
+                type: 'danger',
+                icon: 'el-icon-delete'
+              },
+              {
+                label: '相同',
+                value: 'same',
+                type: 'info',
+                icon: 'el-icon-more-outline'
+              }
+            ]
+          }
+        }
+      },
+      computed: {
+        compareDataFiltered() {
+          let list = this.compareDataSorted || [];
+          list = this.applyTypeMapper(list);
+          list = this.applyTypeFilter(list);
+
+          return list;
         },
-        plugins: {
-          typeOptions: [
-            {
-              label: '新增',
-              value: 'add',
-              type: 'success',
-              icon: 'el-icon-star-off'
-            },
-            {
-              label: '删除',
-              value: 'remove',
-              type: 'danger',
-              icon: 'el-icon-delete'
-            },
-            {
-              label: '相同',
-              value: 'same',
-              type: 'info',
-              icon: 'el-icon-more-outline'
-            }
-          ]
+        dataTypeCount() {
+          return _.reduce(initData, (res, val, key) => {
+            res[val.type] = (res[val.type] ?? 0) + 1;
+            return res;
+          }, {});
+        }
+      },
+      mounted() {
+        this.compareDataSorted = _.cloneDeep(initData);
+      },
+      methods: {
+        // popups / popdowns
+        popupFilterDrawer() {
+          this.state.filterDrawerVisible = true;
+        },
+        // Mappers
+        applyTypeMapper(list = []) {
+          let typeOptionMap = _.keyBy(this.plugins.typeOptions, 'value');
+          let listMapped = _.map(list, v => {
+            let typeKey = v.type || '';
+            let typeOption = typeOptionMap[typeKey] || {};
+
+            v.typeOption = typeOption;
+
+            return v;
+          });
+
+          return listMapped;
+        },
+        applyTypeFilter(list = []) {
+          let listFiltered = _.filter(list, v => this.state.filterTypes.indexOf(v.type) !== -1);
+
+          return listFiltered;
+        },
+        // Sorter
+        sortNatualCompare(a, b, order) {
+          const compareRes = naturalCompare(a, b);
+          switch (order) {
+            case 'ascending':
+              return compareRes;
+            case 'descending':
+              return -compareRes;
+            default:
+              return 0;
+          }
+        },
+        sortStringCompare(a, b, order) {
+          let compareRes = 0;
+          if (a > b) {
+            compareRes = -1;
+          } else if (a < b) {
+            compareRes = 1;
+          }
+          switch (order) {
+            case 'ascending':
+              return compareRes;
+            case 'descending':
+              return -compareRes;
+            default:
+              return 0;
+          }
+        },
+        sortChange({ column, prop, order }) {
+          const list = _.cloneDeep(initData);
+          if (prop === 'lhs') {
+            this.compareDataSorted = list.sort((a, b) => {
+              const aName = _.get(a, 'lhs.0.filename', '');
+              const bName = _.get(b, 'lhs.0.filename', '');
+              return this.sortNatualCompare(aName, bName, order);
+            });
+          } else if (prop === 'rhs') {
+            this.compareDataSorted = list.sort((a, b) => {
+              const aName = _.get(a, 'rhs.0.filename', '');
+              const bName = _.get(b, 'rhs.0.filename', '');
+              return this.sortNatualCompare(aName, bName, order);
+            });
+          } else if (prop === 'type') {
+            this.compareDataSorted = list.sort((a, b) => {
+              const aType = _.get(a, 'type', '');
+              const bType = _.get(b, 'type', '');
+              return this.sortStringCompare(aType, bType, order);
+            });
+          } else if (prop === 'hash') {
+            this.compareDataSorted = list.sort((a, b) => {
+              const aHash = _.get(a, 'hash', '');
+              const bHash = _.get(b, 'hash', '');
+              return this.sortStringCompare(aHash, bHash, order);
+            });
+          }
         }
       }
-    },
-    computed: {
-      compareDataFiltered() {
-        let list = this.compareDataSorted || [];
-        list = this.applyTypeMapper(list);
-        list = this.applyTypeFilter(list);
-
-        return list;
-      },
-      dataTypeCount() {
-        return _.reduce(initData, (res, val, key) => {
-          res[val.type] = (res[val.type] ?? 0) + 1;
-          return res;
-        }, {});
-      }
-    },
-    mounted() {
-      this.compareDataSorted = _.cloneDeep(initData);
-    },
-    methods: {
-      // popups / popdowns
-      popupFilterDrawer() {
-        this.state.filterDrawerVisible = true;
-      },
-      // Mappers
-      applyTypeMapper(list = []) {
-        let typeOptionMap = _.keyBy(this.plugins.typeOptions, 'value');
-        let listMapped = _.map(list, v => {
-          let typeKey = v.type || '';
-          let typeOption = typeOptionMap[typeKey] || {};
-
-          v.typeOption = typeOption;
-
-          return v;
-        });
-
-        return listMapped;
-      },
-      applyTypeFilter(list = []) {
-        let listFiltered = _.filter(list, v => this.state.filterTypes.indexOf(v.type) !== -1);
-
-        return listFiltered;
-      },
-      // Sorter
-      sortNatualCompare(a, b, order) {
-        const compareRes = naturalCompare(a, b);
-        switch(order) {
-          case 'ascending':
-            return compareRes;
-          case 'descending':
-            return -compareRes;
-          default:
-            return 0;
-        }
-      },
-      sortStringCompare(a, b, order) {
-        let compareRes = 0;
-        if(a > b) {
-          compareRes = -1;
-        } else if(a < b) {
-          compareRes = 1;
-        }
-        switch(order) {
-          case 'ascending':
-            return compareRes;
-          case 'descending':
-            return -compareRes;
-          default:
-            return 0;
-        }
-      },
-      sortChange({ column, prop, order }) {
-        const list = _.cloneDeep(initData);
-        if(prop === 'lhs') {
-          this.compareDataSorted = list.sort((a, b) => {
-            const aName = _.get(a, 'lhs.0.filename', '');
-            const bName = _.get(b, 'lhs.0.filename', '');
-            return this.sortNatualCompare(aName, bName, order);
-          });
-        } else if(prop === 'rhs') {
-          this.compareDataSorted = list.sort((a, b) => {
-            const aName = _.get(a, 'rhs.0.filename', '');
-            const bName = _.get(b, 'rhs.0.filename', '');
-            return this.sortNatualCompare(aName, bName, order);
-          });
-        } else if(prop === 'type') {
-          this.compareDataSorted = list.sort((a, b) => {
-            const aType = _.get(a, 'type', '');
-            const bType = _.get(b, 'type', '');
-            return this.sortStringCompare(aType, bType, order);
-          });
-        } else if(prop === 'hash') {
-          this.compareDataSorted = list.sort((a, b) => {
-            const aHash = _.get(a, 'hash', '');
-            const bHash = _.get(b, 'hash', '');
-            return this.sortStringCompare(aHash, bHash, order);
-          });
-        }
-      }
-    }
-  })
+    })
   </script>
 </body>
+
 </html>
