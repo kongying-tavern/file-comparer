@@ -139,8 +139,17 @@ function resortCompareSummary(summary = []) {
 }
 
 function getCompareReport(summary = []) {
-    const templatePath = UtilPath.resolve(currentPath, '../../template/compare.summary.vue');
-    const template = UtilFs.readFile(templatePath);
+    let template = '';
+
+    // Get Raw Template
+    const templatePath = UtilPath.resolve(currentPath, '../../template/compare.summary.html');
+    template = UtilFs.readFile(templatePath, 'utf-8');
+
+    // Replace Data Section
+    const DATA_SECTION_MATCH = /\/\*\* === DATA AREA START === \*\/[\s\S]*\/\*\* === DATA AREA END === \*\//;
+    template = template.replace(DATA_SECTION_MATCH, 'const initData = {{__ summary __}};');
+
+    // Get Renderer
     const renderer = _.template(template, {
         interpolate: /\{\{__([\s\S]+?)__\}\}/g
     });

@@ -165,7 +165,10 @@
   <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
   <script type="text/javascript" src="https://unpkg.com/natural-compare-lite@1.4.0/index.js"></script>
   <script type="text/javascript">
-  const initData = {{__ summary __}};
+  /** === DATA AREA START === */
+  const initData = [{ "type": "same", "hash": "a7f3b9c2d1e8f4a6b0c5d2e9f3a8b1c4d7e0f6a2", "lhs": [{ "path": "/mnt/nas/media/2024/videos", "filename": "report_q3_final_v2.mp4", "md5": "8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a" }], "rhs": [{ "path": "/mnt/backup/2024/videos", "filename": "report_q3_final_v2.mp4", "md5": "8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a" }] }, { "type": "add", "hash": "b8c4d5e6f7a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4", "lhs": [], "rhs": [{ "path": "/data/incoming/uploads", "filename": "IMG_20240518_143022.jpg", "md5": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d" }] }, { "type": "remove", "hash": "c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8", "lhs": [{ "path": "/var/log/archives", "filename": "syslog_20231105.tar.gz", "md5": "f1e2d3c4b5a69788796a5b4c3d2e1f0a" }], "rhs": [] }, { "type": "same", "hash": "d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0", "lhs": [{ "path": "/home/user/documents", "filename": "meeting_notes.docx", "md5": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6" }], "rhs": [{ "path": "/mnt/cloud/docs", "filename": "meeting_notes.docx", "md5": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6" }] }, { "type": "add", "hash": "e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1", "lhs": [], "rhs": [{ "path": "/tmp/extracted", "filename": "dataset_part4.csv", "md5": "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d" }] }, { "type": "remove", "hash": "f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2", "lhs": [{ "path": "/opt/app/cache", "filename": "temp_render_8842.tmp", "md5": "0f1e2d3c4b5a69788796a5b4c3d2e1f0" }], "rhs": [] }];
+  /** === DATA AREA END === */
+
   new Vue({
     el: '#app',
     data() {
