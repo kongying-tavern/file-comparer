@@ -30,6 +30,10 @@
       padding: .7rem;
     }
 
+    .cursor-pointer {
+      cursor: pointer
+    }
+
     .drawer-wrapper {
       padding: 0;
     }
@@ -37,9 +41,14 @@
     .drawer-wrapper.sort-options {
       display: grid;
       align-items: center;
-      grid-template-columns: 1fr auto 0fr;
+      grid-template-columns: 0fr 1fr auto 0fr;
       column-gap: 1rem;
       row-gap: .3rem;
+    }
+
+    .drawer-wrapper.sort-options .sort-order {
+      display: flex;
+      gap: .2rem;
     }
 
     .form-header {
@@ -122,6 +131,14 @@
       </div>
       <div class="drawer-wrapper sort-options">
         <template v-for="(item, index) in sortConfig" :key="index">
+          <div class="sort-order">
+            <el-icon v-if="index > 0" class="cursor-pointer" @click="moveSortUp(index)">
+              <icon-arrow-up />
+            </el-icon>
+            <el-icon v-if="index < sortConfig.length - 1" class="cursor-pointer" @click="moveSortDown(index)">
+              <icon-arrow-down />
+            </el-icon>
+          </div>
           <div>
             <el-select v-model="item.prop" placeholder="请选择" size="mini">
               <el-option v-for="(sortType, i) in SORT_PROP_OPTIONS" :key="i" :label="sortType.label"
@@ -359,6 +376,30 @@
         sortConfig.value.splice(index, 1);
       };
 
+      const swapSort = (indexA, indexB) => {
+        if (!_.isFinite(indexA) || !_.isFinite(indexB))
+          return;
+        else if (indexA === indexB)
+          return;
+        else if (indexA < 0 || indexB < 0)
+          return;
+        else if (indexA >= sortConfig.value.length || indexB >= sortConfig.value.length)
+          return;
+
+        const configA = sortConfig.value[indexA];
+        const configB = sortConfig.value[indexB];
+        sortConfig.value[indexA] = configB;
+        sortConfig.value[indexB] = configA;
+      };
+
+      const moveSortUp = (index) => {
+        swapSort(index, index - 1);
+      };
+
+      const moveSortDown = (index) => {
+        swapSort(index, index + 1);
+      };
+
       const sortedList = Vue.computed(() => {
         return _.sortBy(list.value ?? [], sortHandlers.value);
       });
@@ -368,6 +409,8 @@
         sortedList,
         addSort,
         removeSort,
+        moveSortUp,
+        moveSortDown,
       };
     };
 
@@ -405,6 +448,8 @@
       sortedList,
       addSort,
       removeSort,
+      moveSortUp,
+      moveSortDown,
     } = useSort({
       list: filteredList,
     });
@@ -426,6 +471,8 @@
           sortedList,
           addSort,
           removeSort,
+          moveSortUp,
+          moveSortDown,
           counts,
 
           // Icons
@@ -435,6 +482,10 @@
       }
     });
     app.use(ElementPlus);
+
+    app.component('IconArrowUp', ElementPlusIconsVue.ArrowUp);
+    app.component('IconArrowDown', ElementPlusIconsVue.ArrowDown);
+
     app.mount('#app');
   </script>
 </body>
