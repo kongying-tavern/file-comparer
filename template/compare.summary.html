@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>文件比对结果</title>
+  <link rel="stylesheet" type="text/css"
+    href="https://cdn.bootcdn.net/ajax/libs/element-plus/2.13.5/theme-chalk/index.min.css">
+  <style type="text/css">
+    /** Element Plus Resets */
+    .el-drawer__header {
+      margin-bottom: .8rem !important;
+    }
+
+    .el-drawer__body {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+  </style>
+  <style type="text/css">
+    #app {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: .7rem;
+    }
+
+    .cursor-pointer {
+      cursor: pointer
+    }
+
+    .drawer-wrapper {
+      padding: 0;
+    }
+
+    .drawer-wrapper.sort-options {
+      display: grid;
+      align-items: center;
+      grid-template-columns: 0fr 1fr auto 0fr;
+      column-gap: 1rem;
+      row-gap: .3rem;
+    }
+
+    .drawer-wrapper.sort-options .sort-order {
+      display: flex;
+      gap: .2rem;
+    }
+
+    .form-header {
+      padding: 0;
+      margin: 0;
+      display: flex;
+      font-size: 1.5rem;
+      font-weight: bold;
+      gap: 1rem;
+      margin-bottom: .4rem;
+    }
+
+    .form-header .flex-auto {
+      flex: auto;
+    }
+
+    .form-header .flex-none {
+      flex: none;
+    }
+
+    .form-component {
+      width: 100%;
+    }
+
+    .action-wrapper {
+      flex: none;
+      margin-bottom: .7rem;
+      display: flex;
+      gap: .2rem;
+      align-items: center;
+    }
+
+    .action-wrapper .wrapper {
+      flex: auto;
+    }
+
+    .action-wrapper .summary {
+      flex: none;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .table-wrapper {
+      position: relative;
+      flex: auto;
+    }
+
+    .table-component {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!-- Popups -->
+    <el-drawer v-model="drawerVisible" direction="rtl" size="40%" :wrapperClosable="false" append-to-body
+      modal-append-to-body>
+      <!-- Filter -->
+      <div class="form-header">筛选</div>
+      <el-form class="drawer-wrapper" size="mini" label-position="left" label-width="100px">
+        <el-form-item label="差异类型">
+          <el-select v-model="filterTypes" class="form-component" multiple>
+            <el-option v-for="(item, i) in FILTER_TYPE_OPTIONS" :key="i" :label="item.label" :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+
+      <!-- Sort -->
+      <div class="form-header">
+        <span class="flex-auto">排序</span>
+        <div class="flex-none">
+          <el-button type="primary" @click="addSort()">+</el-button>
+        </div>
+      </div>
+      <div class="drawer-wrapper sort-options">
+        <template v-for="(item, index) in sortConfig" :key="index">
+          <div class="sort-order">
+            <el-icon v-if="index > 0" class="cursor-pointer" @click="moveSortUp(index)">
+              <icon-arrow-up />
+            </el-icon>
+            <el-icon v-if="index < sortConfig.length - 1" class="cursor-pointer" @click="moveSortDown(index)">
+              <icon-arrow-down />
+            </el-icon>
+          </div>
+          <div>
+            <el-select v-model="item.prop" placeholder="请选择" size="mini">
+              <el-option v-for="(sortType, i) in SORT_PROP_OPTIONS" :key="i" :label="sortType.label"
+                :value="sortType.value">
+              </el-option>
+            </el-select>
+          </div>
+          <div>
+            <el-radio-group v-model="item.order" size="mini">
+              <el-radio-button label="ascending">升序</el-radio-button>
+              <el-radio-button label="descending">降序</el-radio-button>
+            </el-radio-group>
+          </div>
+          <div>
+            <el-button type="danger" :icon="IconDelete" @click="removeSort(index)"></el-button>
+          </div>
+        </template>
+      </div>
+    </el-drawer>
+
+    <!-- Action Tools -->
+    <div class="action-wrapper">
+      <div class="wrapper">
+        <el-button size="mini" type="info" :icon="IconMoreFilled" circle @click="openPopup()">
+        </el-button>
+      </div>
+      <div class="summary">
+        <div v-for="(type, index) in FILTER_TYPE_OPTIONS">
+          {{type.label}}
+          <el-tag type="primary">{{counts[type.value] ?? 0}}</el-tag>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper">
+      <el-table class="table-component" :data="sortedList" size="mini" border height="auto">
+        <el-empty #empty description="暂无数据"></el-empty>
+
+        <el-table-column label="数字签名" prop="hash">
+          <template #default="{ row }">
+            {{row.hash}}
+          </template>
+        </el-table-column>
+        <el-table-column label="左侧文件名" prop="lhs">
+          <template #default="{ row }">
+            <template v-if="row.lhs && row.lhs.length > 0">
+              <div v-for="(item, i) in row.lhs" :key="i">
+                {{item.filename}}
+              </div>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column width="100" align="center" prop="type">
+          <template #default="{ row }">
+            <el-button size="mini" :type="row.typeOption.type" :icon="row.typeOption.icon" circle>
+            </el-button>
+          </template>
+        </el-table-column>
+        <el-table-column label="右侧侧文件名" prop="rhs">
+          <template #default="{ row }">
+            <template v-if="row.rhs && row.rhs.length > 0">
+              <div v-for="(item, i) in row.rhs" :key="i">
+                {{item.filename}}
+              </div>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/vue/3.5.22/vue.global.prod.min.js"></script>
+  <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/element-plus/2.13.5/index.full.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdn.bootcdn.net/ajax/libs/element-plus-icons-vue/2.3.2/index.iife.min.js"></script>
+  <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/natural-compare-lite@1.4.0/index.js"></script>
+  <script type="text/javascript">
+    /** === DATA AREA START === */
+    const initData = [{ "type": "same", "hash": "a7f3b9c2d1e8f4a6b0c5d2e9f3a8b1c4d7e0f6a2", "lhs": [{ "path": "/mnt/nas/media/2024/videos", "filename": "report_q3_final_v2.mp4", "md5": "8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a" }], "rhs": [{ "path": "/mnt/backup/2024/videos", "filename": "report_q3_final_v2.mp4", "md5": "8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a" }] }, { "type": "add", "hash": "b8c4d5e6f7a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4", "lhs": [], "rhs": [{ "path": "/data/incoming/uploads", "filename": "IMG_20240518_143022.jpg", "md5": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d" }] }, { "type": "remove", "hash": "c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8", "lhs": [{ "path": "/var/log/archives", "filename": "syslog_20231105.tar.gz", "md5": "f1e2d3c4b5a69788796a5b4c3d2e1f0a" }], "rhs": [] }, { "type": "same", "hash": "d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0", "lhs": [{ "path": "/home/user/documents", "filename": "meeting_notes.docx", "md5": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6" }], "rhs": [{ "path": "/mnt/cloud/docs", "filename": "meeting_notes.docx", "md5": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6" }] }, { "type": "add", "hash": "e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1", "lhs": [], "rhs": [{ "path": "/tmp/extracted", "filename": "dataset_part4.csv", "md5": "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d" }] }, { "type": "remove", "hash": "f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2", "lhs": [{ "path": "/opt/app/cache", "filename": "temp_render_8842.tmp", "md5": "0f1e2d3c4b5a69788796a5b4c3d2e1f0" }], "rhs": [] }];
+    /** === DATA AREA END === */
+
+    const FILTER_TYPE_OPTIONS = [
+      {
+        label: '新增',
+        value: 'add',
+        type: 'success',
+        icon: ElementPlusIconsVue.Star,
+      },
+      {
+        label: '删除',
+        value: 'remove',
+        type: 'danger',
+        icon: ElementPlusIconsVue.Delete,
+      },
+      {
+        label: '相同',
+        value: 'same',
+        type: 'info',
+        icon: ElementPlusIconsVue.More,
+      }
+    ];
+    const FILTER_TYPE_OPTION_MAP = _.keyBy(FILTER_TYPE_OPTIONS, 'value');
+
+    const SORT_PROP_OPTIONS = [
+      {
+        label: '数字签名',
+        value: 'hash',
+      },
+      {
+        label: '左侧文件名',
+        value: 'lhs',
+      },
+      {
+        label: '右侧文件名',
+        value: 'rhs',
+      },
+      {
+        label: '差异类型',
+        value: 'type',
+      }
+    ];
+
+    const mappedList = Vue.computed(() => {
+      let listMapped = _.map(initData, v => {
+        let filterTypeKey = v.type || '';
+        let filterTypeOption = FILTER_TYPE_OPTION_MAP[filterTypeKey] || {};
+
+        v.typeOption = filterTypeOption;
+
+        return v;
+      });
+
+      return listMapped;
+    });
+
+    const useFilter = (options) => {
+      const { list, filterTypes } = options;
+
+      const filteredList = Vue.computed(() => {
+        let listFiltered = _.filter(list.value ?? [], v => filterTypes.value.indexOf(v.type) !== -1);
+
+        return listFiltered;
+      });
+
+      return {
+        filteredList,
+      };
+    };
+
+    const useSort = (options) => {
+      const { list } = options;
+
+      // Sorter
+      const sortNatualCompare = (a, b, order) => {
+        const compareRes = naturalCompare(a, b);
+        switch (order) {
+          case 'ascending':
+            return compareRes;
+          case 'descending':
+            return -compareRes;
+          default:
+            return 0;
+        }
+      };
+
+      const sortStringCompare = (a, b, order) => {
+        let compareRes = 0;
+        if (a > b) {
+          compareRes = -1;
+        } else if (a < b) {
+          compareRes = 1;
+        }
+        switch (order) {
+          case 'ascending':
+            return compareRes;
+          case 'descending':
+            return -compareRes;
+          default:
+            return 0;
+        }
+      };
+
+      const sortConfig = Vue.ref([]);
+
+      const SORT_HANDLER_MAP = {
+        'lhs': {
+          handler: sortNatualCompare,
+          prop: 'lhs.0.filename',
+        },
+        'rhs': {
+          handler: sortNatualCompare,
+          prop: 'rhs.0.filename',
+        },
+        'type': {
+          handler: sortStringCompare,
+          prop: 'type',
+        },
+        'hash': {
+          handler: sortStringCompare,
+          prop: 'hash',
+        },
+      };
+
+      const sortHandlers = Vue.computed(() => {
+        let handlers = [];
+
+        for (let i = 0; i < sortConfig.value.length; i++) {
+          const configItem = sortConfig.value[i];
+          const handler = SORT_HANDLER_MAP[configItem.prop];
+
+          if (!handler)
+            continue;
+
+          const handlerFn = (a, b) => {
+            const aVal = _.get(a, handler.prop, '');
+            const bVal = _.get(b, handler.prop, '');
+            return handler.handler(aVal, bVal, configItem.order);
+          }
+          handlers.push(handlerFn);
+        }
+
+        return handlers;
+      });
+
+      const addSort = () => {
+        sortConfig.value.push({
+          prop: '',
+          order: 'ascending',
+        });
+      };
+
+      const removeSort = (index) => {
+        sortConfig.value.splice(index, 1);
+      };
+
+      const swapSort = (indexA, indexB) => {
+        if (!_.isFinite(indexA) || !_.isFinite(indexB))
+          return;
+        else if (indexA === indexB)
+          return;
+        else if (indexA < 0 || indexB < 0)
+          return;
+        else if (indexA >= sortConfig.value.length || indexB >= sortConfig.value.length)
+          return;
+
+        const configA = sortConfig.value[indexA];
+        const configB = sortConfig.value[indexB];
+        sortConfig.value[indexA] = configB;
+        sortConfig.value[indexB] = configA;
+      };
+
+      const moveSortUp = (index) => {
+        swapSort(index, index - 1);
+      };
+
+      const moveSortDown = (index) => {
+        swapSort(index, index + 1);
+      };
+
+      const sortedList = Vue.computed(() => {
+        return _.sortBy(list.value ?? [], sortHandlers.value);
+      });
+
+      return {
+        sortConfig,
+        sortedList,
+        addSort,
+        removeSort,
+        moveSortUp,
+        moveSortDown,
+      };
+    };
+
+    const useStatistics = (options) => {
+      const { list } = options;
+
+      const counts = Vue.computed(() => {
+        return _.reduce(list.value ?? [], (res, val, key) => {
+          res[val.type] = (res[val.type] ?? 0) + 1;
+          return res;
+        }, {});
+      });
+
+      return {
+        counts,
+      };
+    };
+
+    const drawerVisible = Vue.shallowRef(false);
+    const filterTypes = Vue.ref(['add', 'remove', 'same']);
+
+    // popups / popdowns
+    const openPopup = () => {
+      drawerVisible.value = true;
+    };
+
+    // data builder
+    const { filteredList } = useFilter({
+      list: mappedList,
+      filterTypes,
+    });
+
+    const {
+      sortConfig,
+      sortedList,
+      addSort,
+      removeSort,
+      moveSortUp,
+      moveSortDown,
+    } = useSort({
+      list: filteredList,
+    });
+
+    const { counts } = useStatistics({
+      list: filteredList,
+    });
+
+    const app = Vue.createApp({
+      setup() {
+        return {
+          initData,
+          FILTER_TYPE_OPTIONS,
+          SORT_PROP_OPTIONS,
+          filterTypes,
+          openPopup,
+          drawerVisible,
+          sortConfig,
+          sortedList,
+          addSort,
+          removeSort,
+          moveSortUp,
+          moveSortDown,
+          counts,
+
+          // Icons
+          IconDelete: ElementPlusIconsVue.Delete,
+          IconMoreFilled: ElementPlusIconsVue.MoreFilled,
+        };
+      }
+    });
+    app.use(ElementPlus);
+
+    app.component('IconArrowUp', ElementPlusIconsVue.ArrowUp);
+    app.component('IconArrowDown', ElementPlusIconsVue.ArrowDown);
+
+    app.mount('#app');
+  </script>
+</body>
+
+</html>
