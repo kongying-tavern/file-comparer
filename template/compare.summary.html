@@ -309,9 +309,9 @@
       const sortStringCompare = (a, b, order) => {
         let compareRes = 0;
         if (a > b) {
-          compareRes = -1;
-        } else if (a < b) {
           compareRes = 1;
+        } else if (a < b) {
+          compareRes = -1;
         }
         switch (order) {
           case 'ascending':
@@ -400,8 +400,20 @@
         swapSort(index, index + 1);
       };
 
+      const createMultiSort = (...comparators) => {
+        return (a, b) => {
+          for (const comparator of comparators) {
+            const result = comparator(a, b);
+            if (result !== 0)
+              return result;
+          }
+          return 0;
+        };
+      };
+
       const sortedList = Vue.computed(() => {
-        return _.sortBy(list.value ?? [], sortHandlers.value);
+        const copyList = [...(list.value ?? [])];
+        return copyList.sort(createMultiSort(...sortHandlers.value));
       });
 
       return {
